@@ -49,5 +49,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
     notFound()
   }
 
-  return <Chat id={chat.id} initialMessages={chat.messages} />
+  return (
+    <Chat
+      id={chat.id}
+      initialMessages={chat.messages}
+      supaAccessToken={session.access_token}
+    />
+  )
 }

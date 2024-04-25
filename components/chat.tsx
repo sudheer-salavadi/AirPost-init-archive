@@ -25,9 +25,15 @@ const IS_PREVIEW = process.env.VERCEL_ENV === 'preview'
 export interface ChatProps extends React.ComponentProps<'div'> {
   initialMessages?: Message[]
   id?: string
+  supaAccessToken: string
 }
 
-export function Chat({ id, initialMessages, className }: ChatProps) {
+export function Chat({
+  id,
+  initialMessages,
+  supaAccessToken,
+  className
+}: ChatProps) {
   const [previewToken, setPreviewToken] = useLocalStorage<string | null>(
     'ai-token',
     null
@@ -36,6 +42,8 @@ export function Chat({ id, initialMessages, className }: ChatProps) {
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? '')
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
+      api: 'http://127.0.0.1:54321/functions/v1/vercel-ai-chat', // Route chat to supabase edge function
+      headers: { Authorization: `Bearer ${supaAccessToken}` }, // Auth header to secure the function invocation
       initialMessages,
       id,
       body: {
