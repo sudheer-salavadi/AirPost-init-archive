@@ -1,5 +1,5 @@
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.5";
+/// <reference types="https://esm.sh/v135/@supabase/functions-js@2.3.1/src/edge-runtime.d.ts" />
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.7";
 import { corsHeaders } from "../_shared/cors.ts";
 
 const session = new Supabase.ai.Session("llama3");
@@ -18,9 +18,7 @@ Deno.serve(async (req: Request) => {
     { global: { headers: { Authorization: authHeader } } },
   );
   // Get user
-  const { data: { user }, error } = await supabase.auth.getUser(
-    authHeader.split("Bearer ")[1],
-  );
+  const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw error;
   if (!user) throw new Error("no user");
   const userId = user.id;
@@ -31,14 +29,19 @@ Deno.serve(async (req: Request) => {
   console.log(json);
   const { messages, previewToken } = json;
   const prompt =
-    `You're a friendly support assistant. Given the following message history between a user and you, the assistant, answer the user's most recent question taking into consideration on all the context provided in the messages.
+    `You're a friendly support assistant. Given the following message history between a user and you, the assistant, answer the user's most recent question taking into consideration all the context provided in the messages.
     
     Messages:
     ${JSON.stringify(messages)}
     `.trim();
 
   // Get the output as a stream
-  const output = await session.run(prompt, { stream: true });
+  const output =
+    (await session.run(prompt, { stream: true })) as AsyncGenerator<
+      { response: string | null },
+      never,
+      void
+    >;
 
   // Create a stream
   const stream = new ReadableStream({

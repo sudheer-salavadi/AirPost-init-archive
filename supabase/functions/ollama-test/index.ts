@@ -6,7 +6,12 @@ Deno.serve(async (req: Request) => {
   const prompt = params.get("prompt") ?? "";
 
   // Get the output as a stream
-  const output = await session.run(prompt, { stream: true });
+  const output =
+    (await session.run(prompt, { stream: true })) as AsyncGenerator<
+      { response: string | null },
+      never,
+      void
+    >;
 
   const headers = new Headers({
     "Content-Type": "text/event-stream",
